@@ -16,6 +16,42 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon SmartKasir - Mesin Kasir Ikon Jelas -->
+<!-- Favicon SmartKasir - Mesin Kasir Outline -->
+<link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <!-- Background -->
+  <rect width='100' height='100' rx='20' fill='%23A8DF8E'/>
+
+  <!-- Outline style -->
+  <g fill='none' stroke='%23555' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'>
+    
+    <!-- Layar -->
+    <rect x='34' y='10' width='32' height='16' rx='3'/>
+    <line x1='50' y1='26' x2='50' y2='34'/>
+
+    <!-- Body -->
+    <rect x='20' y='34' width='60' height='34' rx='6'/>
+
+    <!-- Printer / struk -->
+    <rect x='24' y='38' width='14' height='18' rx='2'/>
+    <line x1='27' y1='42' x2='35' y2='42'/>
+    <line x1='27' y1='47' x2='35' y2='47'/>
+
+    <!-- Layar kecil -->
+    <rect x='44' y='38' width='20' height='10' rx='2'/>
+
+    <!-- Keypad -->
+    <rect x='34' y='52' width='8' height='6' rx='1'/>
+    <rect x='46' y='52' width='8' height='6' rx='1'/>
+    <rect x='58' y='52' width='8' height='6' rx='1'/>
+
+    <!-- Laci -->
+    <rect x='28' y='70' width='44' height='10' rx='3'/>
+    <circle cx='50' cy='75' r='1.5'/>
+  </g>
+</svg>">
+
     <style>
         :root {
             --primary-color: #A8DF8E;
@@ -245,6 +281,88 @@
             flex-direction: column;
             justify-content: center;
         }
+        
+        .premium-feature {
+            position: relative;
+        }
+        
+        .premium-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .pricing-card {
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pricing-card.premium {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .price-period {
+            font-size: 1rem;
+            color: #666;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list li i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .feature-list .fa-check {
+            color: var(--success-color);
+        }
+        
+        .feature-list .fa-times {
+            color: var(--danger-color);
+        }
+        
+        .modal-backdrop {
+            z-index: 1040;
+        }
+        
+        .modal {
+            z-index: 1050;
+        }
     </style>
 </head>
 <body>
@@ -300,7 +418,7 @@
             
             <div class="mb-3">
                 <label for="register-password" class="form-label">Password</label>
-                                <input type="password" class="form-control form-control-custom" id="register-password" placeholder="Masukkan password (minimal 6 karakter)">
+                <input type="password" class="form-control form-control-custom" id="register-password" placeholder="Masukkan password (minimal 6 karakter)">
                 <div class="invalid-feedback" id="register-password-error"></div>
             </div>
             
@@ -339,7 +457,7 @@
         </div>
         
         <div class="footer">
-            <p>SmartKasir &copy; 2023 - Sistem Kasir Sederhana untuk UMKM</p>
+            <p>SmartKasir &copy; 2026 - Sistem Kasir Sederhana untuk UMKM</p>
         </div>
     </div>
 
@@ -401,6 +519,135 @@
         <div class="notification alert alert-success" id="notification" role="alert">
             <i class="fas fa-check-circle me-2"></i>
             <span id="notification-text">Operasi berhasil!</span>
+        </div>
+
+        <!-- Modal Pembayaran Premium -->
+        <div class="modal fade" id="premiumPaymentModal" tabindex="-1" aria-labelledby="premiumPaymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="premiumPaymentModalLabel">Upgrade ke Premium</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 pricing-card premium">
+                                    <div class="card-body text-center">
+                                        <h4 class="card-title">Premium Plan</h4>
+                                        <div class="price">Rp 99.000</div>
+                                        <div class="price-period">/ bulan</div>
+                                        
+                                        <ul class="feature-list mt-4">
+                                            <li><i class="fas fa-check"></i> Download laporan Excel</li>
+                                            <li><i class="fas fa-check"></i> Semua fitur Free</li>
+                                            <li><i class="fas fa-check"></i> Prioritas dukungan</li>
+                                            <li><i class="fas fa-check"></i> Backup data otomatis</li>
+                                        </ul>
+                                        
+                                        <button class="btn btn-warning btn-lg mt-4 w-100" onclick="processPayment('monthly')">
+                                            <i class="fas fa-crown me-2"></i>Pilih Bulanan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 pricing-card premium">
+                                    <div class="card-body text-center">
+                                        <h4 class="card-title">Premium Tahunan</h4>
+                                        <div class="price">Rp 999.000</div>
+                                        <div class="price-period">/ tahun (hemat 16%)</div>
+                                        
+                                        <ul class="feature-list mt-4">
+                                            <li><i class="fas fa-check"></i> Semua fitur Premium</li>
+                                            <li><i class="fas fa-check"></i> Hemat Rp 189.000</li>
+                                            <li><i class="fas fa-check"></i> Update fitur premium</li>
+                                            <li><i class="fas fa-check"></i> Konsultasi gratis</li>
+                                        </ul>
+                                        
+                                        <button class="btn btn-warning btn-lg mt-4 w-100" onclick="processPayment('yearly')">
+                                            <i class="fas fa-crown me-2"></i>Pilih Tahunan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Metode Pembayaran</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-4 mb-2">
+                                    <div class="card payment-method" onclick="selectPaymentMethod('qris')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-qrcode fa-2x mb-2"></i>
+                                            <p class="mb-0">QRIS</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="card payment-method" onclick="selectPaymentMethod('transfer')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-university fa-2x mb-2"></i>
+                                            <p class="mb-0">Transfer Bank</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <div class="card payment-method" onclick="selectPaymentMethod('virtual_account')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-credit-card fa-2x mb-2"></i>
+                                            <p class="mb-0">Virtual Account</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="payment-details" style="display: none;">
+                                <hr>
+                                <h6 id="selected-method"></h6>
+                                <div id="qris-details" style="display: none;">
+                                    <p>Scan QR Code berikut untuk pembayaran:</p>
+                                    <div class="text-center">
+                                        <div style="width: 200px; height: 200px; background: #f8f9fa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                            <span class="text-muted">QR Code akan muncul setelah konfirmasi</span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-3"><small>Pembayaran via QRIS akan diproses otomatis setelah scanning.</small></p>
+                                </div>
+                                
+                                <div id="transfer-details" style="display: none;">
+                                    <p>Transfer ke rekening berikut:</p>
+                                    <div class="alert alert-info">
+                                        <p class="mb-1"><strong>Bank:</strong> BCA (Bank Central Asia)</p>
+                                        <p class="mb-1"><strong>No. Rekening:</strong> 1234 5678 9012</p>
+                                        <p class="mb-1"><strong>Atas Nama:</strong> PT SmartKasir Indonesia</p>
+                                        <p class="mb-0"><strong>Jumlah:</strong> <span id="transfer-amount"></span></p>
+                                    </div>
+                                    <p><small>Setelah transfer, kirim bukti pembayaran ke WhatsApp: 0812-3456-7890</small></p>
+                                </div>
+                                
+                                <div id="virtual-account-details" style="display: none;">
+                                    <p>Virtual Account untuk pembayaran:</p>
+                                    <div class="alert alert-info">
+                                        <p class="mb-1"><strong>Bank:</strong> BCA</p>
+                                        <p class="mb-1"><strong>Virtual Account:</strong> <span id="va-number">1234567890123456</span></p>
+                                        <p class="mb-1"><strong>Atas Nama:</strong> <span id="va-name"></span></p>
+                                        <p class="mb-0"><strong>Jumlah:</strong> <span id="va-amount"></span></p>
+                                    </div>
+                                    <p><small>Virtual Account akan aktif selama 24 jam setelah konfirmasi.</small></p>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-success w-100" onclick="confirmPayment()">
+                                        <i class="fas fa-check-circle me-2"></i>Konfirmasi Pembayaran
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Halaman Dashboard -->
@@ -662,6 +909,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
+                                <!-- Tombol Download Excel dengan pengecekan premium -->
                                 <button class="btn btn-primary-custom me-2" onclick="downloadExcelReport()">
                                     <i class="fas fa-file-excel me-1"></i>Download Excel
                                 </button>
@@ -761,7 +1009,12 @@
                             <input type="text" class="form-control form-control-custom" id="account-joined" disabled>
                         </div>
                         
-                        <button class="btn btn-primary-custom" onclick="upgradeToPremium()">
+                        <div class="mb-3">
+                            <label class="form-label">Masa Aktif Premium</label>
+                            <input type="text" class="form-control form-control-custom" id="premium-expiry" disabled value="-" placeholder="Belum berlangganan">
+                        </div>
+                        
+                        <button class="btn btn-warning w-100" onclick="showPremiumPaymentModal()">
                             <i class="fas fa-crown me-1"></i>Upgrade ke Premium
                         </button>
                     </div>
@@ -801,6 +1054,7 @@
         <div class="footer">
             <p>SmartKasir &copy; 2023 - Sistem Kasir Sederhana untuk UMKM</p>
             <p class="text-muted">Versi 1.0 | Data disimpan di localStorage browser Anda</p>
+            <p class="text-muted"><small>Fitur Download Excel memerlukan akun Premium. Semua fitur lainnya dapat digunakan secara gratis.</small></p>
         </div>
     </div>
 
@@ -824,6 +1078,10 @@
         // Chart instances
         let financialChart = null;
         let reportChart = null;
+        
+        // Payment variables
+        let selectedPlan = null;
+        let selectedPaymentMethod = null;
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1017,6 +1275,8 @@
                 email: email,
                 password: simpleHash(password),
                 isPremium: false,
+                premiumExpiry: null,
+                premiumPlan: null,
                 joinedDate: new Date().toISOString(),
                 transactions: [],
                 expenses: []
@@ -2002,10 +2262,30 @@
         function downloadExcelReport() {
             if (!currentUser) return;
             
-            // Check if user is premium
+            // Check if user is premium - ONLY THIS FEATURE REQUIRES PREMIUM
             if (!currentUser.isPremium) {
-                showNotification('Fitur ini hanya untuk pengguna premium. Upgrade ke premium untuk download laporan Excel.', 'warning');
+                showNotification('Fitur download Excel hanya untuk pengguna premium. Upgrade ke premium untuk mendownload laporan Excel.', 'warning');
+                
+                // Tampilkan konfirmasi upgrade
+                if (confirm('Anda memerlukan akun premium untuk mendownload laporan Excel. Upgrade sekarang?')) {
+                    showPremiumPaymentModal();
+                }
                 return;
+            }
+            
+            // Check premium expiry
+            if (currentUser.premiumExpiry) {
+                const expiryDate = new Date(currentUser.premiumExpiry);
+                const now = new Date();
+                
+                if (expiryDate < now) {
+                    showNotification('Masa aktif premium Anda telah berakhir. Silakan perpanjang untuk menggunakan fitur download Excel.', 'warning');
+                    
+                    if (confirm('Masa aktif premium Anda telah berakhir. Perpanjang sekarang?')) {
+                        showPremiumPaymentModal();
+                    }
+                    return;
+                }
             }
             
             // Create Excel data
@@ -2132,38 +2412,151 @@
             // Update premium status
             const statusElement = document.getElementById('account-status');
             const premiumBadge = document.getElementById('premium-badge');
+            const premiumExpiryElement = document.getElementById('premium-expiry');
             
-            if (currentUser.isPremium) {
-                statusElement.textContent = 'Premium';
-                statusElement.className = 'badge bg-warning text-dark';
-                premiumBadge.style.display = 'inline';
+            if (currentUser.isPremium && currentUser.premiumExpiry) {
+                const expiryDate = new Date(currentUser.premiumExpiry);
+                const now = new Date();
+                
+                if (expiryDate > now) {
+                    statusElement.textContent = 'Premium';
+                    statusElement.className = 'badge bg-warning text-dark';
+                    premiumBadge.style.display = 'inline';
+                    
+                    // Format expiry date
+                    const formattedExpiry = expiryDate.toLocaleDateString('id-ID', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    premiumExpiryElement.value = formattedExpiry;
+                } else {
+                    // Premium expired
+                    statusElement.textContent = 'Free';
+                    statusElement.className = 'badge bg-secondary';
+                    premiumBadge.style.display = 'none';
+                    premiumExpiryElement.value = 'Masa aktif telah berakhir';
+                }
             } else {
                 statusElement.textContent = 'Free';
                 statusElement.className = 'badge bg-secondary';
                 premiumBadge.style.display = 'none';
+                premiumExpiryElement.value = 'Belum berlangganan';
             }
         }
         
-        function upgradeToPremium() {
-            if (currentUser && !currentUser.isPremium) {
-                if (confirm('Upgrade ke akun premium untuk akses fitur download laporan Excel. Lanjutkan?')) {
+        function showPremiumPaymentModal() {
+            // Reset payment selection
+            selectedPlan = null;
+            selectedPaymentMethod = null;
+            
+            // Hide payment details
+            document.getElementById('payment-details').style.display = 'none';
+            document.getElementById('qris-details').style.display = 'none';
+            document.getElementById('transfer-details').style.display = 'none';
+            document.getElementById('virtual-account-details').style.display = 'none';
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('premiumPaymentModal'));
+            modal.show();
+        }
+        
+        function processPayment(planType) {
+            selectedPlan = planType;
+            
+            // Show payment methods
+            document.getElementById('payment-details').style.display = 'block';
+            document.getElementById('selected-method').textContent = 'Pilih metode pembayaran:';
+            
+            // Reset all payment method styles
+            document.querySelectorAll('.payment-method').forEach(card => {
+                card.style.border = '1px solid #dee2e6';
+            });
+        }
+        
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Update selected method display
+            document.getElementById('selected-method').textContent = `Metode Pembayaran: ${method.toUpperCase()}`;
+            
+            // Highlight selected card
+            document.querySelectorAll('.payment-method').forEach(card => {
+                card.style.border = '1px solid #dee2e6';
+            });
+            event.currentTarget.style.border = '2px solid var(--primary-color)';
+            
+            // Show details based on method
+            document.getElementById('qris-details').style.display = 'none';
+            document.getElementById('transfer-details').style.display = 'none';
+            document.getElementById('virtual-account-details').style.display = 'none';
+            
+            // Calculate amount
+            let amount = 0;
+            if (selectedPlan === 'monthly') {
+                amount = 99000;
+            } else if (selectedPlan === 'yearly') {
+                amount = 999000;
+            }
+            
+            if (method === 'qris') {
+                document.getElementById('qris-details').style.display = 'block';
+            } else if (method === 'transfer') {
+                document.getElementById('transfer-details').style.display = 'block';
+                document.getElementById('transfer-amount').textContent = `Rp ${amount.toLocaleString('id-ID')}`;
+            } else if (method === 'virtual_account') {
+                document.getElementById('virtual-account-details').style.display = 'block';
+                document.getElementById('va-number').textContent = '888' + Math.floor(1000000000000 + Math.random() * 9000000000000);
+                document.getElementById('va-name').textContent = currentUser.name;
+                document.getElementById('va-amount').textContent = `Rp ${amount.toLocaleString('id-ID')}`;
+            }
+        }
+        
+        function confirmPayment() {
+            if (!selectedPlan || !selectedPaymentMethod) {
+                showNotification('Pilih paket dan metode pembayaran terlebih dahulu', 'warning');
+                return;
+            }
+            
+            if (confirm('Konfirmasi pembayaran untuk upgrade ke premium?')) {
+                // Simulate payment processing
+                showLoading(true);
+                
+                setTimeout(() => {
+                    // Update user premium status
                     const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
                     const userIndex = users.findIndex(u => u.id === currentUser.id);
                     
                     if (userIndex !== -1) {
                         users[userIndex].isPremium = true;
+                        users[userIndex].premiumPlan = selectedPlan;
+                        
+                        // Calculate expiry date
+                        const expiryDate = new Date();
+                        if (selectedPlan === 'monthly') {
+                            expiryDate.setMonth(expiryDate.getMonth() + 1);
+                        } else if (selectedPlan === 'yearly') {
+                            expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+                        }
+                        users[userIndex].premiumExpiry = expiryDate.toISOString();
+                        
                         localStorage.setItem('smartkasir_users', JSON.stringify(users));
                         
                         // Update currentUser
                         currentUser = users[userIndex];
                         localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
                         
-                        showNotification('Selamat! Akun Anda telah diupgrade ke premium.', 'success');
+                        // Close modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('premiumPaymentModal'));
+                        modal.hide();
+                        
+                        showLoading(false);
+                        showNotification('Pembayaran berhasil! Akun Anda sekarang premium.', 'success');
+                        
+                        // Update account page
                         loadAccountData();
                     }
-                }
-            } else if (currentUser && currentUser.isPremium) {
-                showNotification('Akun Anda sudah premium.', 'info');
+                }, 2000);
             }
         }
         
