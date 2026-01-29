@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartKasir - Sistem Kasir Sederhana</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS untuk export Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #A8DF8E;
+            --secondary-color: #FFFDF6;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        html, body {
+            background-color: #A8DF8E; /* Warna background full seperti pada gambar */
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container-app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Warna latar belakang untuk halaman utama aplikasi */
+        #app-container {
+            background-color: var(--secondary-color);
+            min-height: calc(100vh - 40px); /* 40px untuk padding atas dan bawah */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-custom {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .nav-link {
+            color: #333;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: #000;
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary-custom {
+            background-color: var(--primary-color);
+            color: #333;
+            border: none;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary-custom:hover {
+            background-color: #95d17e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-custom {
+            background-color: white;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        .card-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+        }
+        
+        .form-control-custom {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(168, 223, 142, 0.25);
+        }
+        
+        .table-custom {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table-custom thead {
+            background-color: var(--primary-color);
+        }
+        
+        .profit {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .loss {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+        
+        .page-container {
+            display: none;
+        }
+        
+        .page-active {
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 300px;
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .nav-link {
+                margin: 5px;
+                padding: 5px 10px;
+            }
+            
+            #app-container {
+                margin: 10px;
+                padding: 15px;
+                min-height: calc(100vh - 20px);
+            }
+        }
+        
+        .premium-badge {
+            background-color: gold;
+            color: #333;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .forgot-password {
+            font-size: 0.9rem;
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        #auth-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Container Login/Register -->
+    <div id="auth-container" class="container-app">
+        <div class="login-container" id="login-page">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-cash-register me-2"></i>SmartKasir
+            </h2>
+            
+            <div class="mb-3">
+                <label for="login-email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-custom" id="login-email" placeholder="halo@gmail.com">
+                <div class="invalid-feedback" id="login-email-error">Email tidak valid</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="login-password" class="form-label">Password</label>
+                <input type="password" class="form-control form-control-custom" id="login-password" placeholder="Masukkan password">
+                <div class="invalid-feedback" id="login-password-error"></div>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember-me">
+                <label class="form-check-label" for="remember-me">Ingat saya</label>
+            </div>
+            
+            <button class="btn btn-primary-custom w-100 mb-3" onclick="login()">Login</button>
+            
+            <div class="forgot-password">
+                <a href="#" onclick="showForgotPassword()">Lupa password?</a>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p>Belum punya akun? <a href="#" onclick="showRegister()">Daftar disini</a></p>
+            </div>
+        </div>
+        
+        <div class="login-container" id="register-page" style="display: none;">
+            <h2 class="text-center mb-4">Daftar Akun Baru</h2>
+            
+            <div class="mb-3">
+                <label for="register-name" class="form-label">Nama Lengkap</label>
+                <input type="text" class="form-control form-control-custom" id="register-name" placeholder="Masukkan nama lengkap">
+                <div class="invalid-feedback" id="register-name-error"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="register-email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-custom" id="register-email" placeholder="Masukkan email">
+                <div class="invalid-feedback" id="register-email-error"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="register-password" class="form-label">Password</label>
+                                <input type="password" class="form-control form-control-custom" id="register-password" placeholder="Masukkan password (minimal 6 karakter)">
+                <div class="invalid-feedback" id="register-password-error"></div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="register-confirm-password" class="form-label">Konfirmasi Password</label>
+                <input type="password" class="form-control form-control-custom" id="register-confirm-password" placeholder="Konfirmasi password">
+                <div class="invalid-feedback" id="register-confirm-password-error"></div>
+            </div>
+            
+            <button class="btn btn-primary-custom w-100 mb-3" onclick="register()">Daftar</button>
+            
+            <div class="text-center mt-3">
+                <p>Sudah punya akun? <a href="#" onclick="showLogin()">Login disini</a></p>
+            </div>
+        </div>
+        
+        <div class="login-container" id="forgot-password-page" style="display: none;">
+            <h2 class="text-center mb-4">Lupa Password</h2>
+            
+            <div class="mb-3">
+                <label for="forgot-email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-custom" id="forgot-email" placeholder="Masukkan email terdaftar">
+                <div class="invalid-feedback" id="forgot-email-error"></div>
+            </div>
+            
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                Kami akan mengirimkan instruksi reset password ke email Anda.
+            </div>
+            
+            <button class="btn btn-primary-custom w-100 mb-3" onclick="resetPassword()">Reset Password</button>
+            
+            <div class="text-center mt-3">
+                <p><a href="#" onclick="showLogin()">Kembali ke halaman login</a></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>SmartKasir &copy; 2023 - Sistem Kasir Sederhana untuk UMKM</p>
+        </div>
+    </div>
+
+    <!-- Container utama aplikasi -->
+    <div class="container-app" id="app-container" style="display: none;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-cash-register me-2"></i>SmartKasir
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('dashboard')">
+                                <i class="fas fa-home me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('kasir')">
+                                <i class="fas fa-shopping-cart me-1"></i>Kasir
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('pengeluaran')">
+                                <i class="fas fa-money-bill-wave me-1"></i>Pengeluaran
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('laporan')">
+                                <i class="fas fa-chart-line me-1"></i>Laporan
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showPage('akun')">
+                                <i class="fas fa-user me-1"></i>Akun
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <button class="btn btn-primary-custom" onclick="logout()">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading indicator -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Memproses...</p>
+        </div>
+
+        <!-- Notification -->
+        <div class="notification alert alert-success" id="notification" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span id="notification-text">Operasi berhasil!</span>
+        </div>
+
+        <!-- Halaman Dashboard -->
+        <div id="dashboard-page" class="page-container page-active">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card-custom">
+                        <h3 class="card-title">Ringkasan Keuangan</h3>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-muted">Pemasukan</h5>
+                                        <h3 class="card-text" id="total-pemasukan">Rp 0</h3>
+                                        <p class="card-text"><small class="text-muted">Hari ini</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-muted">Pengeluaran</h5>
+                                        <h3 class="card-text" id="total-pengeluaran">Rp 0</h3>
+                                        <p class="card-text"><small class="text-muted">Hari ini</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-muted">Laba / Rugi</h5>
+                                        <h3 class="card-text" id="total-laba">Rp 0</h3>
+                                        <p class="card-text"><small class="text-muted">Hari ini</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Grafik Keuangan 7 Hari Terakhir</h5>
+                            <div class="chart-container">
+                                <canvas id="financialChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card-custom mb-3">
+                        <h3 class="card-title">Transaksi Terbaru</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-transactions">
+                                    <!-- Data transaksi akan dimuat di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card-custom">
+                        <h3 class="card-title">Pengeluaran Terbaru</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Kategori</th>
+                                        <th>Jumlah</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-expenses">
+                                    <!-- Data pengeluaran akan dimuat di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Kasir -->
+        <div id="kasir-page" class="page-container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card-custom">
+                        <h3 class="card-title">Simulasi Kasir</h3>
+                        
+                        <div class="mb-4">
+                            <h5>Pilih Produk</h5>
+                            <div class="row" id="product-list">
+                                <!-- Daftar produk akan dimuat di sini -->
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Keranjang Belanja</h5>
+                            <div class="table-responsive">
+                                <table class="table table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Produk</th>
+                                            <th>Harga</th>
+                                            <th>Jumlah</th>
+                                            <th>Subtotal</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cart-items">
+                                        <!-- Item keranjang akan dimuat di sini -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-primary-custom" onclick="clearCart()">
+                                <i class="fas fa-trash me-1"></i>Kosongkan Keranjang
+                            </button>
+                            <div>
+                                <h4>Total: <span id="cart-total">Rp 0</span></h4>
+                                <button class="btn btn-success btn-lg" onclick="processPayment()">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Bayar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card-custom">
+                        <h3 class="card-title">Ringkasan Transaksi</h3>
+                        <div class="mb-3">
+                            <label for="customer-name" class="form-label">Nama Pelanggan (Opsional)</label>
+                            <input type="text" class="form-control form-control-custom" id="customer-name" placeholder="Masukkan nama pelanggan">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="payment-method" class="form-label">Metode Pembayaran</label>
+                            <select class="form-select form-control-custom" id="payment-method">
+                                <option value="cash">Tunai</option>
+                                <option value="transfer">Transfer Bank</option>
+                                <option value="qris">QRIS</option>
+                                <option value="debit">Kartu Debit</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Detail Pembayaran</h5>
+                            <table class="table">
+                                <tr>
+                                    <td>Subtotal</td>
+                                    <td class="text-end" id="summary-subtotal">Rp 0</td>
+                                </tr>
+                                <tr>
+                                    <td>Pajak (0%)</td>
+                                    <td class="text-end" id="summary-tax">Rp 0</td>
+                                </tr>
+                                <tr>
+                                    <th>Total</th>
+                                    <th class="text-end" id="summary-total">Rp 0</th>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Klik "Bayar" untuk menyimpan transaksi dan menambahkan pemasukan.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Pengeluaran -->
+        <div id="pengeluaran-page" class="page-container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h3 class="card-title">Tambah Pengeluaran</h3>
+                        
+                        <div class="mb-3">
+                            <label for="expense-category" class="form-label">Kategori Pengeluaran</label>
+                            <select class="form-select form-control-custom" id="expense-category">
+                                <option value="bahan_baku">Bahan Baku</option>
+                                <option value="operasional">Operasional</option>
+                                <option value="gaji">Gaji Karyawan</option>
+                                <option value="sewa">Sewa Tempat</option>
+                                <option value="listrik">Listrik & Air</option>
+                                <option value="lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expense-amount" class="form-label">Jumlah Pengeluaran</label>
+                            <input type="number" class="form-control form-control-custom" id="expense-amount" placeholder="Masukkan jumlah pengeluaran" min="0">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="expense-description" class="form-label">Deskripsi</label>
+                            <textarea class="form-control form-control-custom" id="expense-description" rows="3" placeholder="Deskripsi pengeluaran"></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary-custom w-100" onclick="addExpense()">
+                            <i class="fas fa-plus me-1"></i>Tambah Pengeluaran
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h3 class="card-title">Daftar Pengeluaran</h3>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Kategori</th>
+                                        <th>Jumlah</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expense-list">
+                                    <!-- Daftar pengeluaran akan dimuat di sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-danger" onclick="clearExpenses()">
+                                <i class="fas fa-trash me-1"></i>Reset Data Pengeluaran
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Laporan -->
+        <div id="laporan-page" class="page-container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card-custom">
+                        <h3 class="card-title">Laporan Keuangan</h3>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="report-period" class="form-label">Periode Laporan</label>
+                                <select class="form-select form-control-custom" id="report-period" onchange="loadReportData()">
+                                    <option value="today">Hari Ini</option>
+                                    <option value="week">Minggu Ini</option>
+                                    <option value="month">Bulan Ini</option>
+                                    <option value="year">Tahun Ini</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <button class="btn btn-primary-custom me-2" onclick="downloadExcelReport()">
+                                    <i class="fas fa-file-excel me-1"></i>Download Excel
+                                </button>
+                                <button class="btn btn-danger" onclick="resetAllData()">
+                                    <i class="fas fa-redo me-1"></i>Reset Semua Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <div class="mb-4">
+                                    <h5>Grafik Keuangan</h5>
+                                    <div class="chart-container">
+                                        <canvas id="reportChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Statistik</h5>
+                                        <table class="table">
+                                            <tr>
+                                                <td>Total Transaksi</td>
+                                                <td class="text-end" id="report-total-transactions">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Total Pemasukan</td>
+                                                <td class="text-end" id="report-total-income">Rp 0</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Total Pengeluaran</td>
+                                                <td class="text-end" id="report-total-expenses">Rp 0</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Laba/Rugi Bersih</th>
+                                                <th class="text-end" id="report-net-profit">Rp 0</th>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5>Detail Transaksi</h5>
+                            <div class="table-responsive">
+                                <table class="table table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>ID Transaksi</th>
+                                            <th>Pelanggan</th>
+                                            <th>Metode</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="report-transactions">
+                                        <!-- Daftar transaksi laporan akan dimuat di sini -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Akun -->
+        <div id="akun-page" class="page-container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h3 class="card-title">Informasi Akun</h3>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap</label>
+                            <input type="text" class="form-control form-control-custom" id="account-name" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-custom" id="account-email" disabled>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <div>
+                                <span class="badge bg-secondary" id="account-status">Free</span>
+                                <span class="premium-badge" id="premium-badge" style="display: none;">PREMIUM</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Bergabung Sejak</label>
+                            <input type="text" class="form-control form-control-custom" id="account-joined" disabled>
+                        </div>
+                        
+                        <button class="btn btn-primary-custom" onclick="upgradeToPremium()">
+                            <i class="fas fa-crown me-1"></i>Upgrade ke Premium
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card-custom">
+                        <h3 class="card-title">Pengaturan</h3>
+                        
+                        <div class="mb-3">
+                            <label for="new-password" class="form-label">Password Baru</label>
+                            <input type="password" class="form-control form-control-custom" id="new-password" placeholder="Masukkan password baru">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm-password" class="form-label">Konfirmasi Password Baru</label>
+                            <input type="password" class="form-control form-control-custom" id="confirm-password" placeholder="Konfirmasi password baru">
+                        </div>
+                        
+                        <button class="btn btn-primary-custom mb-3" onclick="changePassword()">
+                            <i class="fas fa-key me-1"></i>Ubah Password
+                        </button>
+                        
+                        <div class="alert alert-warning mt-4">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Hapus Data</h5>
+                            <p>Menghapus data akan menghapus semua transaksi dan pengeluaran Anda. Tindakan ini tidak dapat dibatalkan.</p>
+                            <button class="btn btn-danger" onclick="deleteAccountData()">
+                                <i class="fas fa-trash me-1"></i>Hapus Semua Data Saya
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>SmartKasir &copy; 2023 - Sistem Kasir Sederhana untuk UMKM</p>
+            <p class="text-muted">Versi 1.0 | Data disimpan di localStorage browser Anda</p>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentUser = null;
+        let cart = [];
+        let products = [
+            { id: 1, name: "Kopi Hitam", price: 10000, category: "minuman" },
+            { id: 2, name: "Teh Manis", price: 5000, category: "minuman" },
+            { id: 3, name: "Nasi Goreng", price: 20000, category: "makanan" },
+            { id: 4, name: "Mie Goreng", price: 18000, category: "makanan" },
+            { id: 5, name: "Roti Bakar", price: 12000, category: "snack" },
+            { id: 6, name: "Kentang Goreng", price: 15000, category: "snack" },
+            { id: 7, name: "Air Mineral", price: 3000, category: "minuman" },
+            { id: 8, name: "Jus Jeruk", price: 12000, category: "minuman" }
+        ];
+        
+        // Chart instances
+        let financialChart = null;
+        let reportChart = null;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            initializeData();
+            renderProducts();
+            updateCartSummary();
+        });
+        
+        // Authentication system
+        function checkAuthStatus() {
+            const session = localStorage.getItem('smartkasir_session');
+            const rememberMe = localStorage.getItem('smartkasir_remember_me') === 'true';
+            
+            if (session) {
+                try {
+                    currentUser = JSON.parse(session);
+                    showApp();
+                } catch (e) {
+                    console.error('Error parsing session:', e);
+                    showAuth();
+                }
+            } else if (rememberMe) {
+                // Try to get user from localStorage
+                const email = localStorage.getItem('smartkasir_remember_email');
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const user = users.find(u => u.email === email);
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('smartkasir_session', JSON.stringify(user));
+                    showApp();
+                } else {
+                    showAuth();
+                }
+            } else {
+                showAuth();
+            }
+        }
+        
+        function showApp() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            
+            // Load user data
+            loadUserData();
+            // Load dashboard data
+            loadDashboardData();
+        }
+        
+        function showAuth() {
+            document.getElementById('auth-container').style.display = 'block';
+            document.getElementById('app-container').style.display = 'none';
+            showLogin();
+        }
+        
+        function showLogin() {
+            document.getElementById('login-page').style.display = 'block';
+            document.getElementById('register-page').style.display = 'none';
+            document.getElementById('forgot-password-page').style.display = 'none';
+        }
+        
+        function showRegister() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('register-page').style.display = 'block';
+            document.getElementById('forgot-password-page').style.display = 'none';
+        }
+        
+        function showForgotPassword() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('register-page').style.display = 'none';
+            document.getElementById('forgot-password-page').style.display = 'block';
+        }
+        
+        // Simple hash function for password (not secure for production)
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return hash.toString(16);
+        }
+        
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const rememberMe = document.getElementById('remember-me').checked;
+            
+            // Reset errors
+            document.getElementById('login-email').classList.remove('is-invalid');
+            document.getElementById('login-password').classList.remove('is-invalid');
+            
+            // Validation
+            if (!validateEmail(email)) {
+                document.getElementById('login-email').classList.add('is-invalid');
+                document.getElementById('login-email-error').textContent = 'Email tidak valid';
+                return;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('login-password').classList.add('is-invalid');
+                document.getElementById('login-password-error').textContent = 'Password minimal 6 karakter';
+                return;
+            }
+            
+            // Get users from localStorage
+            const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+            const hashedPassword = simpleHash(password);
+            const user = users.find(u => u.email === email && u.password === hashedPassword);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('smartkasir_session', JSON.stringify(user));
+                
+                if (rememberMe) {
+                    localStorage.setItem('smartkasir_remember_me', 'true');
+                    localStorage.setItem('smartkasir_remember_email', email);
+                } else {
+                    localStorage.removeItem('smartkasir_remember_me');
+                    localStorage.removeItem('smartkasir_remember_email');
+                }
+                
+                showNotification('Login berhasil!', 'success');
+                showApp();
+            } else {
+                document.getElementById('login-password').classList.add('is-invalid');
+                document.getElementById('login-password-error').textContent = 'Email atau password salah';
+            }
+        }
+        
+        function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            // Reset errors
+            document.getElementById('register-name').classList.remove('is-invalid');
+            document.getElementById('register-email').classList.remove('is-invalid');
+            document.getElementById('register-password').classList.remove('is-invalid');
+            document.getElementById('register-confirm-password').classList.remove('is-invalid');
+            
+            // Validation
+            let valid = true;
+            
+            if (name.length < 3) {
+                document.getElementById('register-name').classList.add('is-invalid');
+                document.getElementById('register-name-error').textContent = 'Nama minimal 3 karakter';
+                valid = false;
+            }
+            
+            if (!validateEmail(email)) {
+                document.getElementById('register-email').classList.add('is-invalid');
+                document.getElementById('register-email-error').textContent = 'Email tidak valid';
+                valid = false;
+            }
+            
+            if (password.length < 6) {
+                document.getElementById('register-password').classList.add('is-invalid');
+                document.getElementById('register-password-error').textContent = 'Password minimal 6 karakter';
+                valid = false;
+            }
+            
+            if (password !== confirmPassword) {
+                document.getElementById('register-confirm-password').classList.add('is-invalid');
+                document.getElementById('register-confirm-password-error').textContent = 'Password tidak cocok';
+                valid = false;
+            }
+            
+            if (!valid) return;
+            
+            // Check if email already exists
+            const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+            if (users.some(u => u.email === email)) {
+                document.getElementById('register-email').classList.add('is-invalid');
+                document.getElementById('register-email-error').textContent = 'Email sudah terdaftar';
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                password: simpleHash(password),
+                isPremium: false,
+                joinedDate: new Date().toISOString(),
+                transactions: [],
+                expenses: []
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('smartkasir_users', JSON.stringify(users));
+            
+            showNotification('Pendaftaran berhasil! Silakan login.', 'success');
+            showLogin();
+        }
+        
+        function resetPassword() {
+            const email = document.getElementById('forgot-email').value;
+            
+            if (!validateEmail(email)) {
+                document.getElementById('forgot-email').classList.add('is-invalid');
+                document.getElementById('forgot-email-error').textContent = 'Email tidak valid';
+                return;
+            }
+            
+            // In a real app, you would send an email here
+            // For this demo, we'll just show a success message
+            showNotification('Instruksi reset password telah dikirim ke email Anda.', 'success');
+            showLogin();
+        }
+        
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                currentUser = null;
+                localStorage.removeItem('smartkasir_session');
+                cart = [];
+                showAuth();
+            }
+        }
+        
+        // Application functions
+        function initializeData() {
+            // Initialize localStorage data if not exists
+            if (!localStorage.getItem('smartkasir_users')) {
+                localStorage.setItem('smartkasir_users', JSON.stringify([]));
+            }
+            
+            // Load cart from localStorage if exists
+            const savedCart = localStorage.getItem(`smartkasir_cart_${currentUser?.id}`);
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+            }
+        }
+        
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-container');
+            pages.forEach(page => {
+                page.classList.remove('page-active');
+            });
+            
+            // Show selected page
+            document.getElementById(`${pageId}-page`).classList.add('page-active');
+            
+            // Load page-specific data
+            switch(pageId) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'kasir':
+                    updateCartSummary();
+                    updateCartDisplay();
+                    break;
+                case 'pengeluaran':
+                    loadExpenses();
+                    break;
+                case 'laporan':
+                    loadReportData();
+                    break;
+                case 'akun':
+                    loadAccountData();
+                    break;
+            }
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.className = `notification alert alert-${type}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        // Product and cart functions
+        function renderProducts() {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCol = document.createElement('div');
+                productCol.className = 'col-md-3 col-sm-6 mb-3';
+                
+                productCol.innerHTML = `
+                    <div class="card h-100 product-card" onclick="addToCart(${product.id})" style="cursor: pointer;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">Rp ${product.price.toLocaleString()}</p>
+                            <span class="badge bg-light text-dark">${product.category}</span>
+                        </div>
+                    </div>
+                `;
+                
+                productList.appendChild(productCol);
+            });
+        }
+        
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1
+                });
+            }
+            
+            // Save cart to localStorage
+            if (currentUser) {
+                localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+            }
+            
+            updateCartDisplay();
+            updateCartSummary();
+            showNotification(`${product.name} ditambahkan ke keranjang`, 'success');
+        }
+        
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            
+            // Save cart to localStorage
+            if (currentUser) {
+                localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+            }
+            
+            updateCartDisplay();
+            updateCartSummary();
+        }
+        
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>Rp ${item.price.toLocaleString()}</td>
+                    <td>
+                        <input type="number" min="1" value="${item.quantity}" 
+                               onchange="updateQuantity(${item.id}, this.value)" 
+                               class="form-control form-control-sm" style="width: 70px;">
+                    </td>
+                    <td>Rp ${subtotal.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                cartItems.appendChild(row);
+            });
+        }
+        
+        function updateQuantity(productId, newQuantity) {
+            const quantity = parseInt(newQuantity);
+            if (isNaN(quantity) || quantity < 1) return;
+            
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity = quantity;
+                
+                // Save cart to localStorage
+                if (currentUser) {
+                    localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+                }
+                
+                updateCartDisplay();
+                updateCartSummary();
+            }
+        }
+        
+        function clearCart() {
+            if (cart.length === 0) return;
+            
+            if (confirm('Apakah Anda yakin ingin mengosongkan keranjang?')) {
+                cart = [];
+                
+                // Save cart to localStorage
+                if (currentUser) {
+                    localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+                }
+                
+                updateCartDisplay();
+                updateCartSummary();
+                showNotification('Keranjang telah dikosongkan', 'info');
+            }
+        }
+        
+        function updateCartSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = 0; // No tax for simplicity
+            const total = subtotal + tax;
+            
+            document.getElementById('cart-total').textContent = `Rp ${total.toLocaleString()}`;
+            document.getElementById('summary-subtotal').textContent = `Rp ${subtotal.toLocaleString()}`;
+            document.getElementById('summary-tax').textContent = `Rp ${tax.toLocaleString()}`;
+            document.getElementById('summary-total').textContent = `Rp ${total.toLocaleString()}`;
+        }
+        
+        function processPayment() {
+            if (cart.length === 0) {
+                showNotification('Keranjang kosong, tambahkan produk terlebih dahulu', 'warning');
+                return;
+            }
+            
+            const customerName = document.getElementById('customer-name').value || 'Pelanggan';
+            const paymentMethod = document.getElementById('payment-method').value;
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal;
+            
+            // Create transaction
+            const transaction = {
+                id: `TRX-${Date.now()}`,
+                date: new Date().toISOString(),
+                customerName: customerName,
+                paymentMethod: paymentMethod,
+                items: [...cart],
+                subtotal: subtotal,
+                tax: 0,
+                total: total
+            };
+            
+            // Add transaction to user data
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    if (!users[userIndex].transactions) {
+                        users[userIndex].transactions = [];
+                    }
+                    
+                    users[userIndex].transactions.push(transaction);
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                }
+            }
+            
+            // Clear cart
+            cart = [];
+            if (currentUser) {
+                localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+            }
+            
+            // Reset form
+            document.getElementById('customer-name').value = '';
+            document.getElementById('payment-method').value = 'cash';
+            
+            updateCartDisplay();
+            updateCartSummary();
+            showNotification(`Transaksi berhasil! Total: Rp ${total.toLocaleString()}`, 'success');
+            
+            // Update dashboard if visible
+            if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                loadDashboardData();
+            }
+        }
+        
+        // Expense functions
+        function addExpense() {
+            const category = document.getElementById('expense-category').value;
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const description = document.getElementById('expense-description').value;
+            
+            if (!amount || amount <= 0) {
+                showNotification('Masukkan jumlah pengeluaran yang valid', 'warning');
+                return;
+            }
+            
+            if (!description.trim()) {
+                showNotification('Masukkan deskripsi pengeluaran', 'warning');
+                return;
+            }
+            
+            const expense = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                category: category,
+                amount: amount,
+                description: description
+            };
+            
+            // Add expense to user data
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    if (!users[userIndex].expenses) {
+                        users[userIndex].expenses = [];
+                    }
+                    
+                    users[userIndex].expenses.push(expense);
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                }
+            }
+            
+            // Reset form
+            document.getElementById('expense-amount').value = '';
+            document.getElementById('expense-description').value = '';
+            
+            showNotification('Pengeluaran berhasil ditambahkan', 'success');
+            loadExpenses();
+            
+            // Update dashboard if visible
+            if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                loadDashboardData();
+            }
+        }
+        
+        function loadExpenses() {
+            if (!currentUser || !currentUser.expenses) return;
+            
+            const expenseList = document.getElementById('expense-list');
+            expenseList.innerHTML = '';
+            
+            // Sort expenses by date (newest first)
+            const sortedExpenses = [...currentUser.expenses].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            // Display last 10 expenses
+            const displayExpenses = sortedExpenses.slice(0, 10);
+            
+            displayExpenses.forEach(expense => {
+                const date = new Date(expense.date);
+                const formattedDate = date.toLocaleDateString('id-ID');
+                
+                // Map category to readable text
+                const categoryMap = {
+                    'bahan_baku': 'Bahan Baku',
+                    'operasional': 'Operasional',
+                    'gaji': 'Gaji Karyawan',
+                    'sewa': 'Sewa Tempat',
+                    'listrik': 'Listrik & Air',
+                    'lainnya': 'Lainnya'
+                };
+                
+                const categoryText = categoryMap[expense.category] || expense.category;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${categoryText}</td>
+                    <td>Rp ${expense.amount.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteExpense(${expense.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                expenseList.appendChild(row);
+            });
+        }
+        
+        function deleteExpense(expenseId) {
+            if (!confirm('Hapus pengeluaran ini?')) return;
+            
+            if (currentUser && currentUser.expenses) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].expenses = users[userIndex].expenses.filter(e => e.id !== expenseId);
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                    
+                    showNotification('Pengeluaran berhasil dihapus', 'success');
+                    loadExpenses();
+                    
+                    // Update dashboard if visible
+                    if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                        loadDashboardData();
+                    }
+                }
+            }
+        }
+        
+        function clearExpenses() {
+            if (!currentUser || !currentUser.expenses || currentUser.expenses.length === 0) {
+                showNotification('Tidak ada data pengeluaran', 'info');
+                return;
+            }
+            
+            if (confirm('Apakah Anda yakin ingin menghapus semua data pengeluaran? Tindakan ini tidak dapat dibatalkan.')) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].expenses = [];
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                    
+                    showNotification('Semua data pengeluaran telah dihapus', 'success');
+                    loadExpenses();
+                    
+                    // Update dashboard if visible
+                    if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                        loadDashboardData();
+                    }
+                }
+            }
+        }
+        
+        // Dashboard functions
+        function loadDashboardData() {
+            if (!currentUser) return;
+            
+            // Calculate today's date
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+            
+            // Get today's transactions
+            let todayIncome = 0;
+            let recentTransactions = [];
+            
+            if (currentUser.transactions) {
+                todayIncome = currentUser.transactions
+                    .filter(t => {
+                        const transactionDate = new Date(t.date);
+                        return transactionDate >= todayStart && transactionDate < todayEnd;
+                    })
+                    .reduce((sum, t) => sum + t.total, 0);
+                
+                // Get recent transactions (last 5)
+                recentTransactions = [...currentUser.transactions]
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5);
+            }
+            
+            // Get today's expenses
+            let todayExpenses = 0;
+            let recentExpenses = [];
+            
+            if (currentUser.expenses) {
+                todayExpenses = currentUser.expenses
+                    .filter(e => {
+                        const expenseDate = new Date(e.date);
+                        return expenseDate >= todayStart && expenseDate < todayEnd;
+                    })
+                    .reduce((sum, e) => sum + e.amount, 0);
+                
+                // Get recent expenses (last 5)
+                recentExpenses = [...currentUser.expenses]
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 5);
+            }
+            
+            // Calculate profit/loss
+            const todayProfit = todayIncome - todayExpenses;
+            
+            // Update display
+            document.getElementById('total-pemasukan').textContent = `Rp ${todayIncome.toLocaleString()}`;
+            document.getElementById('total-pengeluaran').textContent = `Rp ${todayExpenses.toLocaleString()}`;
+            document.getElementById('total-laba').textContent = `Rp ${Math.abs(todayProfit).toLocaleString()}`;
+            
+            // Add profit/loss class
+            const labaElement = document.getElementById('total-laba');
+            if (todayProfit >= 0) {
+                labaElement.classList.remove('loss');
+                labaElement.classList.add('profit');
+                document.getElementById('total-laba').textContent = `Rp ${todayProfit.toLocaleString()}`;
+            } else {
+                labaElement.classList.remove('profit');
+                labaElement.classList.add('loss');
+                document.getElementById('total-laba').textContent = `-Rp ${Math.abs(todayProfit).toLocaleString()}`;
+            }
+            
+            // Update recent transactions
+            const recentTransactionsBody = document.getElementById('recent-transactions');
+            recentTransactionsBody.innerHTML = '';
+            
+            if (recentTransactions.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="2" class="text-center">Belum ada transaksi</td>`;
+                recentTransactionsBody.appendChild(row);
+            } else {
+                recentTransactions.forEach(transaction => {
+                    const date = new Date(transaction.date);
+                    const formattedTime = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formattedTime}</td>
+                        <td>Rp ${transaction.total.toLocaleString()}</td>
+                    `;
+                    
+                    recentTransactionsBody.appendChild(row);
+                });
+            }
+            
+            // Update recent expenses
+            const recentExpensesBody = document.getElementById('recent-expenses');
+            recentExpensesBody.innerHTML = '';
+            
+            if (recentExpenses.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="2" class="text-center">Belum ada pengeluaran</td>`;
+                recentExpensesBody.appendChild(row);
+            } else {
+                recentExpenses.forEach(expense => {
+                    // Map category to readable text
+                    const categoryMap = {
+                        'bahan_baku': 'Bahan Baku',
+                        'operasional': 'Operasional',
+                        'gaji': 'Gaji',
+                        'sewa': 'Sewa',
+                        'listrik': 'Listrik',
+                        'lainnya': 'Lainnya'
+                    };
+                    
+                    const categoryText = categoryMap[expense.category] || expense.category;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${categoryText}</td>
+                        <td>Rp ${expense.amount.toLocaleString()}</td>
+                    `;
+                    
+                    recentExpensesBody.appendChild(row);
+                });
+            }
+            
+            // Create or update chart
+            createFinancialChart();
+        }
+        
+        function createFinancialChart() {
+            if (!currentUser) return;
+            
+            const ctx = document.getElementById('financialChart');
+            if (!ctx) return;
+            
+            // Get data for last 7 days
+            const dates = [];
+            const incomeData = [];
+            const expenseData = [];
+            const profitData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                const dateEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+                
+                // Format date for label
+                const formattedDate = date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' });
+                dates.push(formattedDate);
+                
+                // Calculate income for this day
+                let dayIncome = 0;
+                if (currentUser.transactions) {
+                    dayIncome = currentUser.transactions
+                        .filter(t => {
+                            const transactionDate = new Date(t.date);
+                            return transactionDate >= dateStart && transactionDate < dateEnd;
+                        })
+                        .reduce((sum, t) => sum + t.total, 0);
+                }
+                incomeData.push(dayIncome);
+                
+                // Calculate expenses for this day
+                let dayExpenses = 0;
+                if (currentUser.expenses) {
+                    dayExpenses = currentUser.expenses
+                        .filter(e => {
+                            const expenseDate = new Date(e.date);
+                            return expenseDate >= dateStart && expenseDate < dateEnd;
+                        })
+                        .reduce((sum, e) => sum + e.amount, 0);
+                }
+                expenseData.push(dayExpenses);
+                
+                // Calculate profit for this day
+                profitData.push(dayIncome - dayExpenses);
+            }
+            
+            // Check if chart already exists and destroy it
+            if (financialChart) {
+                financialChart.destroy();
+            }
+            
+            // Create new chart
+            financialChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Pemasukan',
+                            data: incomeData,
+                            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: expenseData,
+                            backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Laba/Rugi',
+                            data: profitData,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                            tension: 0.3,
+                            borderWidth: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += 'Rp ' + context.raw.toLocaleString('id-ID');
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Report functions
+        function loadReportData() {
+            if (!currentUser) return;
+            
+            const period = document.getElementById('report-period').value;
+            const now = new Date();
+            let startDate, endDate;
+            
+            switch(period) {
+                case 'today':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    break;
+                case 'week':
+                    const dayOfWeek = now.getDay();
+                    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+                    startDate = new Date(now.getFullYear(), now.getMonth(), diff);
+                    endDate = new Date(now.getFullYear(), now.getMonth(), diff + 7);
+                    break;
+                case 'month':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                    endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    break;
+                case 'year':
+                    startDate = new Date(now.getFullYear(), 0, 1);
+                    endDate = new Date(now.getFullYear() + 1, 0, 1);
+                    break;
+                default:
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            }
+            
+            // Filter transactions
+            let filteredTransactions = [];
+            let totalIncome = 0;
+            
+            if (currentUser.transactions) {
+                filteredTransactions = currentUser.transactions
+                    .filter(t => {
+                        const transactionDate = new Date(t.date);
+                        return transactionDate >= startDate && transactionDate < endDate;
+                    })
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                totalIncome = filteredTransactions.reduce((sum, t) => sum + t.total, 0);
+            }
+            
+            // Filter expenses
+            let filteredExpenses = [];
+            let totalExpenses = 0;
+            
+            if (currentUser.expenses) {
+                filteredExpenses = currentUser.expenses
+                    .filter(e => {
+                        const expenseDate = new Date(e.date);
+                        return expenseDate >= startDate && expenseDate < endDate;
+                    });
+                
+                totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+            }
+            
+            // Calculate net profit
+            const netProfit = totalIncome - totalExpenses;
+            
+            // Update report statistics
+            document.getElementById('report-total-transactions').textContent = filteredTransactions.length;
+            document.getElementById('report-total-income').textContent = `Rp ${totalIncome.toLocaleString('id-ID')}`;
+            document.getElementById('report-total-expenses').textContent = `Rp ${totalExpenses.toLocaleString('id-ID')}`;
+            document.getElementById('report-net-profit').textContent = `Rp ${Math.abs(netProfit).toLocaleString('id-ID')}`;
+            
+            // Add profit/loss class
+            const profitElement = document.getElementById('report-net-profit');
+            if (netProfit >= 0) {
+                profitElement.classList.remove('loss');
+                profitElement.classList.add('profit');
+                document.getElementById('report-net-profit').textContent = `Rp ${netProfit.toLocaleString('id-ID')}`;
+            } else {
+                profitElement.classList.remove('profit');
+                profitElement.classList.add('loss');
+                document.getElementById('report-net-profit').textContent = `-Rp ${Math.abs(netProfit).toLocaleString('id-ID')}`;
+            }
+            
+            // Update transactions table
+            const reportTransactionsBody = document.getElementById('report-transactions');
+            reportTransactionsBody.innerHTML = '';
+            
+            if (filteredTransactions.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="5" class="text-center">Tidak ada transaksi dalam periode ini</td>`;
+                reportTransactionsBody.appendChild(row);
+            } else {
+                filteredTransactions.forEach(transaction => {
+                    const date = new Date(transaction.date);
+                    const formattedDate = date.toLocaleDateString('id-ID');
+                    const formattedTime = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // Map payment method to readable text
+                    const paymentMethodMap = {
+                        'cash': 'Tunai',
+                        'transfer': 'Transfer',
+                        'qris': 'QRIS',
+                        'debit': 'Kartu Debit'
+                    };
+                    
+                    const paymentMethodText = paymentMethodMap[transaction.paymentMethod] || transaction.paymentMethod;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formattedDate} ${formattedTime}</td>
+                        <td>${transaction.id}</td>
+                        <td>${transaction.customerName}</td>
+                        <td>${paymentMethodText}</td>
+                        <td>Rp ${transaction.total.toLocaleString('id-ID')}</td>
+                    `;
+                    
+                    reportTransactionsBody.appendChild(row);
+                });
+            }
+            
+            // Create report chart
+            createReportChart(filteredTransactions, filteredExpenses, startDate, endDate, period);
+        }
+        
+        function createReportChart(transactions, expenses, startDate, endDate, period) {
+            const ctx = document.getElementById('reportChart');
+            if (!ctx) return;
+            
+            // Group data by time period
+            let labels = [];
+            let incomeData = [];
+            let expenseData = [];
+            
+            if (period === 'today') {
+                // Group by hour
+                for (let hour = 0; hour < 24; hour++) {
+                    labels.push(`${hour}:00`);
+                    
+                    const hourStart = new Date(startDate);
+                    hourStart.setHours(hour, 0, 0, 0);
+                    const hourEnd = new Date(startDate);
+                    hourEnd.setHours(hour + 1, 0, 0, 0);
+                    
+                    const hourIncome = transactions
+                        .filter(t => {
+                            const transactionDate = new Date(t.date);
+                            return transactionDate >= hourStart && transactionDate < hourEnd;
+                        })
+                        .reduce((sum, t) => sum + t.total, 0);
+                    
+                    incomeData.push(hourIncome);
+                    
+                    const hourExpenses = expenses
+                        .filter(e => {
+                            const expenseDate = new Date(e.date);
+                            return expenseDate >= hourStart && expenseDate < hourEnd;
+                        })
+                        .reduce((sum, e) => sum + e.amount, 0);
+                    
+                    expenseData.push(hourExpenses);
+                }
+            } else if (period === 'week' || period === 'month') {
+                // Group by day
+                const currentDate = new Date(startDate);
+                
+                while (currentDate < endDate) {
+                    const dayStart = new Date(currentDate);
+                    const dayEnd = new Date(currentDate);
+                    dayEnd.setDate(dayEnd.getDate() + 1);
+                    
+                    const dayLabel = currentDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+                    labels.push(dayLabel);
+                    
+                    const dayIncome = transactions
+                        .filter(t => {
+                            const transactionDate = new Date(t.date);
+                            return transactionDate >= dayStart && transactionDate < dayEnd;
+                        })
+                        .reduce((sum, t) => sum + t.total, 0);
+                    
+                    incomeData.push(dayIncome);
+                    
+                    const dayExpenses = expenses
+                        .filter(e => {
+                            const expenseDate = new Date(e.date);
+                            return expenseDate >= dayStart && expenseDate < dayEnd;
+                        })
+                        .reduce((sum, e) => sum + e.amount, 0);
+                    
+                    expenseData.push(dayExpenses);
+                    
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            } else { // year
+                // Group by month
+                for (let month = 0; month < 12; month++) {
+                    const monthStart = new Date(startDate.getFullYear(), month, 1);
+                    const monthEnd = new Date(startDate.getFullYear(), month + 1, 1);
+                    
+                    if (monthStart >= startDate && monthStart < endDate) {
+                        const monthLabel = monthStart.toLocaleDateString('id-ID', { month: 'short' });
+                        labels.push(monthLabel);
+                        
+                        const monthIncome = transactions
+                            .filter(t => {
+                                const transactionDate = new Date(t.date);
+                                return transactionDate >= monthStart && transactionDate < monthEnd;
+                            })
+                            .reduce((sum, t) => sum + t.total, 0);
+                        
+                        incomeData.push(monthIncome);
+                        
+                        const monthExpenses = expenses
+                            .filter(e => {
+                                const expenseDate = new Date(e.date);
+                                return expenseDate >= monthStart && expenseDate < monthEnd;
+                            })
+                            .reduce((sum, e) => sum + e.amount, 0);
+                        
+                        expenseData.push(monthExpenses);
+                    }
+                }
+            }
+            
+            // Check if chart already exists and destroy it
+            if (reportChart) {
+                reportChart.destroy();
+            }
+            
+            // Create new chart
+            reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Pemasukan',
+                            data: incomeData,
+                            backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                            borderColor: 'rgba(40, 167, 69, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Pengeluaran',
+                            data: expenseData,
+                            backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                            borderColor: 'rgba(220, 53, 69, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += 'Rp ' + context.raw.toLocaleString('id-ID');
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function downloadExcelReport() {
+            if (!currentUser) return;
+            
+            // Check if user is premium
+            if (!currentUser.isPremium) {
+                showNotification('Fitur ini hanya untuk pengguna premium. Upgrade ke premium untuk download laporan Excel.', 'warning');
+                return;
+            }
+            
+            // Create Excel data
+            const transactions = currentUser.transactions || [];
+            const expenses = currentUser.expenses || [];
+            
+            // Prepare transaction data
+            const transactionData = transactions.map(t => {
+                const date = new Date(t.date);
+                return {
+                    'Tanggal': date.toLocaleDateString('id-ID'),
+                    'Waktu': date.toLocaleTimeString('id-ID'),
+                    'ID Transaksi': t.id,
+                    'Pelanggan': t.customerName,
+                    'Metode Pembayaran': t.paymentMethod,
+                    'Jumlah Item': t.items.reduce((sum, item) => sum + item.quantity, 0),
+                    'Subtotal': t.subtotal,
+                    'Pajak': t.tax,
+                    'Total': t.total
+                };
+            });
+            
+            // Prepare expense data
+            const expenseData = expenses.map(e => {
+                const date = new Date(e.date);
+                return {
+                    'Tanggal': date.toLocaleDateString('id-ID'),
+                    'Kategori': e.category,
+                    'Jumlah': e.amount,
+                    'Deskripsi': e.description
+                };
+            });
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // Add transaction sheet
+            const transactionWs = XLSX.utils.json_to_sheet(transactionData);
+            XLSX.utils.book_append_sheet(wb, transactionWs, 'Transaksi');
+            
+            // Add expense sheet
+            const expenseWs = XLSX.utils.json_to_sheet(expenseData);
+            XLSX.utils.book_append_sheet(wb, expenseWs, 'Pengeluaran');
+            
+            // Add summary sheet
+            const summaryData = [{
+                'Total Transaksi': transactions.length,
+                'Total Pemasukan': transactions.reduce((sum, t) => sum + t.total, 0),
+                'Total Pengeluaran': expenses.reduce((sum, e) => sum + e.amount, 0),
+                'Laba/Rugi Bersih': transactions.reduce((sum, t) => sum + t.total, 0) - expenses.reduce((sum, e) => sum + e.amount, 0)
+            }];
+            
+            const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, summaryWs, 'Ringkasan');
+            
+            // Generate Excel file
+            const fileName = `Laporan_SmartKasir_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showNotification('Laporan Excel berhasil diunduh', 'success');
+        }
+        
+        function resetAllData() {
+            if (!confirm('Apakah Anda yakin ingin mereset semua data transaksi dan pengeluaran? Tindakan ini tidak dapat dibatalkan.')) {
+                return;
+            }
+            
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    // Reset transactions and expenses
+                    users[userIndex].transactions = [];
+                    users[userIndex].expenses = [];
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                    
+                    // Reset cart
+                    cart = [];
+                    localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+                    
+                    showNotification('Semua data telah direset', 'success');
+                    
+                    // Reload current page
+                    if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                        loadDashboardData();
+                    } else if (document.getElementById('laporan-page').classList.contains('page-active')) {
+                        loadReportData();
+                    } else if (document.getElementById('kasir-page').classList.contains('page-active')) {
+                        updateCartDisplay();
+                        updateCartSummary();
+                    }
+                }
+            }
+        }
+        
+        // Account functions
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            // Update account page if visible
+            if (document.getElementById('akun-page').classList.contains('page-active')) {
+                loadAccountData();
+            }
+        }
+        
+        function loadAccountData() {
+            if (!currentUser) return;
+            
+            document.getElementById('account-name').value = currentUser.name;
+            document.getElementById('account-email').value = currentUser.email;
+            
+            const joinedDate = new Date(currentUser.joinedDate);
+            document.getElementById('account-joined').value = joinedDate.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Update premium status
+            const statusElement = document.getElementById('account-status');
+            const premiumBadge = document.getElementById('premium-badge');
+            
+            if (currentUser.isPremium) {
+                statusElement.textContent = 'Premium';
+                statusElement.className = 'badge bg-warning text-dark';
+                premiumBadge.style.display = 'inline';
+            } else {
+                statusElement.textContent = 'Free';
+                statusElement.className = 'badge bg-secondary';
+                premiumBadge.style.display = 'none';
+            }
+        }
+        
+        function upgradeToPremium() {
+            if (currentUser && !currentUser.isPremium) {
+                if (confirm('Upgrade ke akun premium untuk akses fitur download laporan Excel. Lanjutkan?')) {
+                    const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                    const userIndex = users.findIndex(u => u.id === currentUser.id);
+                    
+                    if (userIndex !== -1) {
+                        users[userIndex].isPremium = true;
+                        localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                        
+                        // Update currentUser
+                        currentUser = users[userIndex];
+                        localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                        
+                        showNotification('Selamat! Akun Anda telah diupgrade ke premium.', 'success');
+                        loadAccountData();
+                    }
+                }
+            } else if (currentUser && currentUser.isPremium) {
+                showNotification('Akun Anda sudah premium.', 'info');
+            }
+        }
+        
+        function changePassword() {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (newPassword.length < 6) {
+                showNotification('Password minimal 6 karakter', 'warning');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('Password tidak cocok', 'warning');
+                return;
+            }
+            
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].password = simpleHash(newPassword);
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                    
+                    // Clear form
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                    
+                    showNotification('Password berhasil diubah', 'success');
+                }
+            }
+        }
+        
+        function deleteAccountData() {
+            if (!confirm('HAPUS SEMUA DATA? Tindakan ini akan menghapus semua transaksi dan pengeluaran Anda. Tindakan ini tidak dapat dibatalkan.')) {
+                return;
+            }
+            
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('smartkasir_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                
+                if (userIndex !== -1) {
+                    // Reset user data but keep account
+                    users[userIndex].transactions = [];
+                    users[userIndex].expenses = [];
+                    localStorage.setItem('smartkasir_users', JSON.stringify(users));
+                    
+                    // Update currentUser
+                    currentUser = users[userIndex];
+                    localStorage.setItem('smartkasir_session', JSON.stringify(currentUser));
+                    
+                    // Reset cart
+                    cart = [];
+                    localStorage.setItem(`smartkasir_cart_${currentUser.id}`, JSON.stringify(cart));
+                    
+                    showNotification('Semua data telah dihapus', 'success');
+                    
+                    // Reload dashboard
+                    if (document.getElementById('dashboard-page').classList.contains('page-active')) {
+                        loadDashboardData();
+                    } else {
+                        showPage('dashboard');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
